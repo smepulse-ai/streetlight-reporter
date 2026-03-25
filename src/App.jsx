@@ -396,6 +396,7 @@ function UpdateStatusPanel({ light, reporter, onBack, onSubmit, saving }) {
         <div className="form-group"><label className="form-label">Email</label><input className="form-input" value={f.reporterEmail} onChange={e => setF({...f, reporterEmail: e.target.value})} /></div>
       </div>
       <div className="form-group"><label className="form-label">e-Tshwane Ref Number (optional - auto-filled)</label><input className="form-input" placeholder="Leave blank for auto-submission" value={f.etshwaneRef} onChange={e => setF({...f, etshwaneRef: e.target.value})} /></div>
+      <div style={{textAlign:'center',margin:'12px 0 4px',lineHeight:1.4,fontSize:12,fontWeight:700,color:'#1a1b23'}}>By submitting, your name, phone and email will be shared with the City of Tshwane via e-Tshwane to process your fault report. Your details are stored securely and not shared with third parties.</div>
       <button className="btn-primary" disabled={!ok||saving} onClick={() => onSubmit({...f, isRereport})}>{saving ? 'Saving...' : '💾 Submit Report'}</button>
     </div>
   </>);
