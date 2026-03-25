@@ -212,7 +212,10 @@ function SearchBar({ onResult, onExisting, lights }) {
             if (status === 'OK' && results.length > 0) resolve(results); else reject(status);
           });
         });
-        const addrSugg = result.slice(0,3).map(r => ({ type:'addr', lat: r.geometry.location.lat(), lng: r.geometry.location.lng(), label: r.formatted_address.split(',')[0], sub: r.formatted_address.split(',').slice(0,3).join(',') }));
+        const WARD41 = { north: -25.720, south: -25.760, east: 28.340, west: 28.290 };
+        const inBounds = (lat, lng) => lat >= WARD41.south && lat <= WARD41.north && lng >= WARD41.west && lng <= WARD41.east;
+        const addrSugg = result.filter(r => inBounds(r.geometry.location.lat(), r.geometry.location.lng())).slice(0,3).map(r => ({ type:'addr', lat: r.geometry.location.lat(), lng: r.geometry.location.lng(), label: r.formatted_address.split(',')[0], sub: r.formatted_address.split(',').slice(0,3).join(',') }));
+        if (addrSugg.length === 0 && poleSugg.length === 0) { setSuggestions([{ type:'info', label:'Address not in Ward 41', sub:'Only Ward 41 addresses considered' }]); return; }
         setSuggestions([...poleSugg, ...addrSugg]);
       } catch { setSuggestions(poleSugg.length > 0 ? poleSugg : []); }
     } else { setSuggestions(poleSugg); }
@@ -226,6 +229,7 @@ function SearchBar({ onResult, onExisting, lights }) {
 
   const handleSelect = (s) => {
     setQ(''); setSuggestions([]);
+    if (s.type === 'info') return;
     if (s.type === 'pole') onExisting(s.id);
     else onResult(s.lat, s.lng, s.sub || s.label);
   };
@@ -607,7 +611,7 @@ export default function App() {
   return (
     <div className="app">
       <header className="header">
-        <div className="logo"><div className="logo-icon">💡</div><div><div className="logo-text">CoT - Ward 41 Service Tracker</div><div className="logo-sub">Meyerspark • City of Tshwane</div></div></div>
+        <div className="logo"><div className="logo-icon">💡</div><div><div className="logo-text">CoT - Ward 41 Service Delivery Tracker</div><div className="logo-sub">Meyerspark • City of Tshwane</div></div></div>
         <nav className="nav-btns">
           <button className={'nav-btn'+(view==='map'?' active':'')} onClick={()=>setView('map')}>🗺 Map</button>
           <button className={'nav-btn'+(view==='dashboard'?' active':'')} onClick={()=>setView('dashboard')}>📊 Dashboard</button>
