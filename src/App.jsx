@@ -136,6 +136,7 @@ function MapView({ lights, onMapClick, onMarkerClick, selectedId, flyTo }) {
   const mapRef = useRef(null);
   const mapI = useRef(null);
   const markers = useRef([]);
+  const [mapReady, setMapReady] = useState(false);
   const cbRef = useRef({ click: onMapClick, marker: onMarkerClick });
   cbRef.current = { click: onMapClick, marker: onMarkerClick };
 
@@ -143,7 +144,7 @@ function MapView({ lights, onMapClick, onMarkerClick, selectedId, flyTo }) {
     if (mapI.current || !mapRef.current) return;
     const init = () => {
       const map = new window.google.maps.Map(mapRef.current, {
-        center: { lat: CENTER[0], lng: CENTER[1] }, zoom: ZOOM,
+        center: { lat: -25.7400, lng: 28.3140 }, zoom: ZOOM,
         styles: [
           { featureType: 'poi', elementType: 'labels', stylers: [{ visibility: 'off' }] },
         ],
@@ -152,6 +153,7 @@ function MapView({ lights, onMapClick, onMarkerClick, selectedId, flyTo }) {
       });
       map.addListener('click', (e) => cbRef.current.click({ lat: e.latLng.lat(), lng: e.latLng.lng() }));
       mapI.current = map;
+      setMapReady(true);
     };
     if (window.google && window.google.maps) { init(); }
     else {
@@ -168,7 +170,7 @@ function MapView({ lights, onMapClick, onMarkerClick, selectedId, flyTo }) {
   }, [flyTo]);
 
   useEffect(() => {
-    if (!mapI.current || !window.google) return;
+    if (!mapReady || !mapI.current || !window.google) return;
     markers.current.forEach(m => m.setMap(null)); markers.current = [];
     lights.forEach(light => {
       const status = getStatus(light); const color = COLORS[status];
@@ -181,7 +183,7 @@ function MapView({ lights, onMapClick, onMarkerClick, selectedId, flyTo }) {
       marker.addListener('click', () => cbRef.current.marker(light.id));
       markers.current.push(marker);
     });
-  }, [lights, selectedId]);
+  }, [lights, selectedId, mapReady]);
 
   return <div ref={mapRef} className="map-container" />;
 }
@@ -511,7 +513,7 @@ export default function App() {
 
   const reload = async () => { const d = await fetchLights(); setLights(d); return d; };
 
-  useEffect(() => { reload().then(() => setLoading(false)); }, []);
+  useEffect(() => { reload().then(() => { setLoading(false); setTimeout(() => setLights(l => [...l]), 500); }); }, []);
   useEffect(() => {
     const ch = supabase.channel('rt2')
       .on('postgres_changes',{event:'*',schema:'public',table:'streetlights'},() => reload())
