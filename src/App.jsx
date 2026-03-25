@@ -537,7 +537,7 @@ export default function App() {
     return () => supabase.removeChannel(ch);
   }, []);
 
-  const handleMapClick = useCallback(coords => { if(panel?.type==='report'||panel?.type==='verify') return; setPanel({type:'add',data:coords}); setSelectedId(null); }, [panel]);
+  const handleMapClick = useCallback(() => {}, []);
   const handleMarkerClick = useCallback(id => { const l=lights.find(x=>x.id===id); if(l){setPanel({type:'detail',data:l});setSelectedId(id);} }, [lights]);
   const goToLight = (id) => { const l=lights.find(x=>x.id===id); if(l){setFlyTo({lat:l.lat,lng:l.lng});setPanel({type:'detail',data:l});setSelectedId(id);} };
 
