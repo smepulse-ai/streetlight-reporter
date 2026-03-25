@@ -389,7 +389,7 @@ function UpdateStatusPanel({ light, reporter, onBack, onSubmit, saving }) {
       <div className="form-group"><label className="form-label">Fault Type *</label>
         <select className="form-select" value={f.faultType} onChange={e => setF({...f, faultType: e.target.value})}>{FAULT_TYPES.map(t => <option key={t} value={t}>{t}</option>)}</select>
       </div>
-      <div className="form-group"><label className="form-label">Description</label><textarea className="form-textarea" placeholder="Optional details..." value={f.description} onChange={e => setF({...f, description: e.target.value})} /></div>
+      <div className="form-group"><label className="form-label">Description</label><textarea className="form-textarea" placeholder="Optional details..." maxLength={250} value={f.description} onChange={e => setF({...f, description: e.target.value})} />{f.description && <div className="text-muted text-xs" style={{textAlign:'right'}}>{f.description.length}/250</div>}</div>
       <div className="divider" /><div className="form-label" style={{color:'#f97316'}}>Your Details (required for e-Tshwane submission)</div>
       <div className="form-row">
         <div className="form-group"><label className="form-label">Name *</label><input className="form-input" value={f.reporterName} onChange={e => setF({...f, reporterName: e.target.value})} /></div>
