@@ -260,7 +260,7 @@ function PhotoUpload({ label, value, onChange }) {
 
 // ---- AddLightPanel ----
 function AddLightPanel({ coords, onSave, onCancel, saving }) {
-  const [f, setF] = useState({ poleNumber:'', streetName: coords.address || '', streetNumber:'', suburb:'Meyerspark', nearestIntersection:'', photo:null, isWorking:true, faultType:FAULT_TYPES[5], etshwaneRef:'', description:'' });
+  const [f, setF] = useState({ poleNumber:'', streetName: coords.address || '', streetNumber:'', suburb:'Meyerspark', nearestIntersection:'', photo:null, isWorking:true });
   const ok = f.poleNumber.trim() && f.streetName.trim();
   return (<>
     <div className="panel-header"><span className="panel-title">Add Streetlight</span><button className="btn-close" onClick={onCancel}>✕</button></div>
@@ -282,13 +282,6 @@ function AddLightPanel({ coords, onSave, onCancel, saving }) {
           <button type="button" className={!f.isWorking ? 'btn-primary not-working-active' : 'btn-secondary'} onClick={() => setF({...f, isWorking:false})}>❌ Not Working</button>
         </div>
       </div>
-      {!f.isWorking && (<>
-        <div className="form-group"><label className="form-label">Fault Type *</label>
-          <select className="form-select" value={f.faultType} onChange={e => setF({...f, faultType: e.target.value})}>{FAULT_TYPES.map(t => <option key={t} value={t}>{t}</option>)}</select>
-        </div>
-        <div className="form-group"><label className="form-label">e-Tshwane Reference Number (auto-filled if left blank)</label><input className="form-input" placeholder="e.g. 6001397783" value={f.etshwaneRef} onChange={e => setF({...f, etshwaneRef: e.target.value})} /></div>
-        <div className="form-group"><label className="form-label">Description</label><textarea className="form-textarea" placeholder="Optional details..." value={f.description} onChange={e => setF({...f, description: e.target.value})} /></div>
-      </>)}
       <button className="btn-primary" disabled={!ok||saving} onClick={() => onSave(f)}>{saving ? 'Saving...' : 'Save Streetlight'}</button>
       <button className="btn-secondary" onClick={onCancel}>Cancel</button>
     </div>
@@ -362,23 +355,29 @@ function LightDetailPanel({ light, onClose, onUpdateStatus, onDelete, onVerify }
 }
 
 // ---- UpdateStatusPanel ----
-function UpdateStatusPanel({ light, onBack, onSubmit, saving }) {
-  const [f, setF] = useState({ faultType: FAULT_TYPES[5], etshwaneRef: '', description: '' });
+function UpdateStatusPanel({ light, reporter, onBack, onSubmit, saving }) {
+  const [f, setF] = useState({ faultType: FAULT_TYPES[5], etshwaneRef: '', description: '', reporterName: reporter.name||'', reporterSurname: reporter.surname||'', reporterPhone: reporter.phone||'', reporterEmail: reporter.email||'' });
   const isRereport = wasEverResolved(light.reports);
-  const ok = true;
+  const ok = f.reporterName.trim() && f.reporterSurname.trim() && f.reporterPhone.trim();
   return (<>
     <div className="panel-header"><div style={{display:'flex',alignItems:'center',gap:8}}><button className="btn-close" onClick={onBack}>←</button><span className="panel-title">Report — Pole {light.pole_number}</span></div></div>
     <div className="panel-body">
       {isRereport && <div className="banner banner-rereport">⚠️ RE-REPORT: This light was previously marked as fixed</div>}
-      <div className="banner banner-info">Report this fault on e-Tshwane first, then enter the reference number below.</div>
-      <button className="btn-etshwane" onClick={() => window.open('https://www.e-tshwane.co.za/lodge-query', '_blank')}>🏢 Open e-Tshwane Portal</button>
-      <div className="divider" />
       <div className="form-group"><label className="form-label">Fault Type *</label>
         <select className="form-select" value={f.faultType} onChange={e => setF({...f, faultType: e.target.value})}>{FAULT_TYPES.map(t => <option key={t} value={t}>{t}</option>)}</select>
       </div>
-      <div className="form-group"><label className="form-label">e-Tshwane Reference Number (auto-filled if left blank)</label><input className="form-input" placeholder="e.g. 6001397783" value={f.etshwaneRef} onChange={e => setF({...f, etshwaneRef: e.target.value})} /></div>
       <div className="form-group"><label className="form-label">Description</label><textarea className="form-textarea" placeholder="Optional details..." value={f.description} onChange={e => setF({...f, description: e.target.value})} /></div>
-      <button className="btn-primary" disabled={!ok||saving} onClick={() => onSubmit({...f, isRereport})}>{saving ? 'Saving...' : '💾 Save Report'}</button>
+      <div className="divider" /><div className="form-label" style={{color:'#f97316'}}>Your Details (required for e-Tshwane submission)</div>
+      <div className="form-row">
+        <div className="form-group"><label className="form-label">Name *</label><input className="form-input" value={f.reporterName} onChange={e => setF({...f, reporterName: e.target.value})} /></div>
+        <div className="form-group"><label className="form-label">Surname *</label><input className="form-input" value={f.reporterSurname} onChange={e => setF({...f, reporterSurname: e.target.value})} /></div>
+      </div>
+      <div className="form-row">
+        <div className="form-group"><label className="form-label">Phone *</label><input className="form-input" value={f.reporterPhone} onChange={e => setF({...f, reporterPhone: e.target.value})} /></div>
+        <div className="form-group"><label className="form-label">Email</label><input className="form-input" value={f.reporterEmail} onChange={e => setF({...f, reporterEmail: e.target.value})} /></div>
+      </div>
+      <div className="form-group"><label className="form-label">e-Tshwane Ref Number (optional - auto-filled)</label><input className="form-input" placeholder="Leave blank for auto-submission" value={f.etshwaneRef} onChange={e => setF({...f, etshwaneRef: e.target.value})} /></div>
+      <button className="btn-primary" disabled={!ok||saving} onClick={() => onSubmit({...f, isRereport})}>{saving ? 'Saving...' : '💾 Submit Report'}</button>
     </div>
   </>);
 }
@@ -513,7 +512,7 @@ export default function App() {
 
   const reload = async () => { const d = await fetchLights(); setLights(d); return d; };
 
-  useEffect(() => { reload().then(() => { setLoading(false); setTimeout(() => setLights(l => [...l]), 500); }); }, []);
+  useEffect(() => { reload().then(() => setLoading(false)); }, []);
   useEffect(() => {
     const ch = supabase.channel('rt2')
       .on('postgres_changes',{event:'*',schema:'public',table:'streetlights'},() => reload())
@@ -531,11 +530,10 @@ export default function App() {
     setSaving(true);
     const nl = await insertLight({...form, lat: panel.data.lat, lng: panel.data.lng});
     if (nl && !form.isWorking) {
-      await insertReport(nl.id, { faultType: form.faultType, description: form.description || null, reporterName: 'Community', reporterSurname: '', reporterPhone: '-', reporterEmail: '', emailSent: false }, false);
-      if (form.etshwaneRef) {
-        const reps = await supabase.from('reports').select().eq('streetlight_id', nl.id).order('reported_at', { ascending: false }).limit(1);
-        if (reps.data && reps.data[0]) await updateRef(reps.data[0].id, form.etshwaneRef);
-      }
+      const upd = await reload(); setSaving(false);
+      const ul = upd.find(l => l.id === nl.id);
+      if (ul) { setPanel({type:'updatestatus', data: ul}); setSelectedId(ul.id); }
+      return;
     }
     const upd = await reload(); setSaving(false);
     if (nl) { const ul=upd.find(l=>l.id===nl.id); if(ul){setPanel({type:'detail',data:ul});setSelectedId(ul.id);} }
@@ -544,8 +542,10 @@ export default function App() {
   const handleReport = async (form) => {
     setSaving(true);
     const isRR = form.isRereport || false;
-    const r = await insertReport(selectedId, { faultType: form.faultType, description: form.description || null, reporterName: 'Community', reporterSurname: '', reporterPhone: '-', reporterEmail: '', emailSent: false }, isRR);
+    const r = await insertReport(selectedId, { faultType: form.faultType, description: form.description || null, reporterName: form.reporterName, reporterSurname: form.reporterSurname, reporterPhone: form.reporterPhone, reporterEmail: form.reporterEmail || '', emailSent: false }, isRR);
     if (r && form.etshwaneRef) { await updateRef(r.id, form.etshwaneRef); }
+    const ur = {name:form.reporterName,surname:form.reporterSurname,phone:form.reporterPhone,email:form.reporterEmail||''};
+    setReporter(ur); try{localStorage.setItem('reporter-v2',JSON.stringify(ur))}catch{}
     const upd = await reload(); setSaving(false);
     const ul = upd.find(l=>l.id===selectedId);
     if(ul) setPanel({type:'detail',data:ul});
@@ -604,7 +604,7 @@ export default function App() {
           {panel && <aside className="panel">
             {panel.type==='add' && <AddLightPanel coords={panel.data} onSave={handleSaveLight} onCancel={()=>{setPanel(null);setSelectedId(null)}} saving={saving} />}
             {panel.type==='detail' && <LightDetailPanel light={panel.data} onClose={()=>{setPanel(null);setSelectedId(null)}} onUpdateStatus={() => setPanel({type:'updatestatus',data:panel.data})} onDelete={()=>handleDelete(panel.data.id)} onVerify={()=>setPanel({type:'verify',data:panel.data})} />}
-            {panel.type==='updatestatus' && <UpdateStatusPanel light={panel.data} onBack={()=>setPanel({type:'detail',data:panel.data})} onSubmit={handleReport} saving={saving} />}
+            {panel.type==='updatestatus' && <UpdateStatusPanel light={panel.data} reporter={reporter} onBack={()=>setPanel({type:'detail',data:panel.data})} onSubmit={handleReport} saving={saving} />}
             {panel.type==='verify' && <VerifyPanel light={panel.data} onBack={()=>setPanel({type:'detail',data:panel.data})} onVerified={handleVerify} saving={saving} />}
           </aside>}
         </>) : <Dashboard lights={lights} />}
