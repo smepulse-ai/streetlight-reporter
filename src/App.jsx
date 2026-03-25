@@ -607,7 +607,7 @@ export default function App() {
   return (
     <div className="app">
       <header className="header">
-        <div className="logo"><div className="logo-icon">💡</div><div><div className="logo-text">Streetlight Reporter</div><div className="logo-sub">Meyerspark • City of Tshwane</div></div></div>
+        <div className="logo"><div className="logo-icon">💡</div><div><div className="logo-text">CoT - Ward 41 Service Tracker</div><div className="logo-sub">Meyerspark • City of Tshwane</div></div></div>
         <nav className="nav-btns">
           <button className={'nav-btn'+(view==='map'?' active':'')} onClick={()=>setView('map')}>🗺 Map</button>
           <button className={'nav-btn'+(view==='dashboard'?' active':'')} onClick={()=>setView('dashboard')}>📊 Dashboard</button>
