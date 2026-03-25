@@ -261,7 +261,7 @@ function PhotoUpload({ label, value, onChange }) {
 // ---- AddLightPanel ----
 function AddLightPanel({ coords, onSave, onCancel, saving }) {
   const [f, setF] = useState({ poleNumber:'', streetName: coords.address || '', streetNumber:'', suburb:'Meyerspark', nearestIntersection:'', photo:null, isWorking:true, faultType:FAULT_TYPES[5], etshwaneRef:'', description:'' });
-  const ok = f.poleNumber.trim() && f.streetName.trim() && (f.isWorking || f.etshwaneRef.trim());
+  const ok = f.poleNumber.trim() && f.streetName.trim();
   return (<>
     <div className="panel-header"><span className="panel-title">Add Streetlight</span><button className="btn-close" onClick={onCancel}>✕</button></div>
     <div className="panel-body">
@@ -286,7 +286,7 @@ function AddLightPanel({ coords, onSave, onCancel, saving }) {
         <div className="form-group"><label className="form-label">Fault Type *</label>
           <select className="form-select" value={f.faultType} onChange={e => setF({...f, faultType: e.target.value})}>{FAULT_TYPES.map(t => <option key={t} value={t}>{t}</option>)}</select>
         </div>
-        <div className="form-group"><label className="form-label">e-Tshwane Reference Number *</label><input className="form-input" placeholder="e.g. 6001397783" value={f.etshwaneRef} onChange={e => setF({...f, etshwaneRef: e.target.value})} /></div>
+        <div className="form-group"><label className="form-label">e-Tshwane Reference Number (auto-filled if left blank)</label><input className="form-input" placeholder="e.g. 6001397783" value={f.etshwaneRef} onChange={e => setF({...f, etshwaneRef: e.target.value})} /></div>
         <div className="form-group"><label className="form-label">Description</label><textarea className="form-textarea" placeholder="Optional details..." value={f.description} onChange={e => setF({...f, description: e.target.value})} /></div>
       </>)}
       <button className="btn-primary" disabled={!ok||saving} onClick={() => onSave(f)}>{saving ? 'Saving...' : 'Save Streetlight'}</button>
@@ -365,7 +365,7 @@ function LightDetailPanel({ light, onClose, onUpdateStatus, onDelete, onVerify }
 function UpdateStatusPanel({ light, onBack, onSubmit, saving }) {
   const [f, setF] = useState({ faultType: FAULT_TYPES[5], etshwaneRef: '', description: '' });
   const isRereport = wasEverResolved(light.reports);
-  const ok = f.etshwaneRef.trim();
+  const ok = true;
   return (<>
     <div className="panel-header"><div style={{display:'flex',alignItems:'center',gap:8}}><button className="btn-close" onClick={onBack}>←</button><span className="panel-title">Report — Pole {light.pole_number}</span></div></div>
     <div className="panel-body">
@@ -376,7 +376,7 @@ function UpdateStatusPanel({ light, onBack, onSubmit, saving }) {
       <div className="form-group"><label className="form-label">Fault Type *</label>
         <select className="form-select" value={f.faultType} onChange={e => setF({...f, faultType: e.target.value})}>{FAULT_TYPES.map(t => <option key={t} value={t}>{t}</option>)}</select>
       </div>
-      <div className="form-group"><label className="form-label">e-Tshwane Reference Number *</label><input className="form-input" placeholder="e.g. 6001397783" value={f.etshwaneRef} onChange={e => setF({...f, etshwaneRef: e.target.value})} /></div>
+      <div className="form-group"><label className="form-label">e-Tshwane Reference Number (auto-filled if left blank)</label><input className="form-input" placeholder="e.g. 6001397783" value={f.etshwaneRef} onChange={e => setF({...f, etshwaneRef: e.target.value})} /></div>
       <div className="form-group"><label className="form-label">Description</label><textarea className="form-textarea" placeholder="Optional details..." value={f.description} onChange={e => setF({...f, description: e.target.value})} /></div>
       <button className="btn-primary" disabled={!ok||saving} onClick={() => onSubmit({...f, isRereport})}>{saving ? 'Saving...' : '💾 Save Report'}</button>
     </div>
