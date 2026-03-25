@@ -9,7 +9,7 @@ const COOLDOWN = 7 * 24 * 60 * 60 * 1000;
 const FAULT_TYPES = ['Area Fault','Damaged Pole','High mast Light out (Apollo)','Lights Flickering','Lights on 24/7','Single Light Fault','Damaged high-mast pole'];
 const COLORS = { working: '#22c55e', not_working: '#ef4444', reported: '#f97316', pending_verify: '#eab308' };
 const LABELS = { working: 'Working', not_working: 'Not Working', reported: 'Reported (<72h)', pending_verify: 'Pending Verification' };
-const VERIFY_NEEDED = 3;
+const VERIFY_NEEDED = 1;
 
 // ---- Helpers ----
 const canReport = (reports) => {
@@ -232,7 +232,7 @@ function SearchBar({ onResult, onExisting, lights }) {
 
   return (
     <div className="search-bar"><div style={{position:'relative'}}>
-      <input placeholder="Search address or pole number..." value={q}
+      <input placeholder="Search the street where you want to report faulty lights..." value={q}
         onChange={e => handleChange(e.target.value)}
         onKeyDown={e => { if (e.key === 'Enter' && suggestions.length) handleSelect(suggestions[0]); }}
         onBlur={() => setTimeout(() => setSuggestions([]), 200)} />
@@ -261,7 +261,7 @@ function PhotoUpload({ label, value, onChange }) {
 // ---- AddLightPanel ----
 function AddLightPanel({ coords, onSave, onCancel, saving }) {
   const [f, setF] = useState({ poleNumber:'', streetName: coords.address || '', streetNumber:'', suburb:'Meyerspark', nearestIntersection:'', photo:null, isWorking:true });
-  const ok = f.poleNumber.trim() && f.streetName.trim();
+  const ok = f.poleNumber.trim() && f.streetName.trim() && f.streetNumber.trim();
   return (<>
     <div className="panel-header"><span className="panel-title">Add Streetlight</span><button className="btn-close" onClick={onCancel}>✕</button></div>
     <div className="panel-body">
@@ -269,7 +269,7 @@ function AddLightPanel({ coords, onSave, onCancel, saving }) {
       <div className="form-group"><label className="form-label">Pole Number *</label><input className="form-input" placeholder="e.g. 3" value={f.poleNumber} onChange={e => setF({...f, poleNumber: e.target.value})} /></div>
       <div className="form-row">
         <div className="form-group"><label className="form-label">Street Name *</label><input className="form-input" placeholder="e.g. Koordinaat St" value={f.streetName} onChange={e => setF({...f, streetName: e.target.value})} /></div>
-        <div className="form-group" style={{maxWidth:100}}><label className="form-label">Number</label><input className="form-input" placeholder="342" value={f.streetNumber} onChange={e => setF({...f, streetNumber: e.target.value})} /></div>
+        <div className="form-group" style={{maxWidth:100}}><label className="form-label">Number *</label><input className="form-input" placeholder="342" value={f.streetNumber} onChange={e => setF({...f, streetNumber: e.target.value})} /></div>
       </div>
       <div className="form-row">
         <div className="form-group"><label className="form-label">Suburb</label><input className="form-input" value={f.suburb} onChange={e => setF({...f, suburb: e.target.value})} /></div>
@@ -289,7 +289,7 @@ function AddLightPanel({ coords, onSave, onCancel, saving }) {
 }
 
 // ---- LightDetailPanel ----
-function LightDetailPanel({ light, onClose, onUpdateStatus, onDelete, onVerify }) {
+function LightDetailPanel({ light, onClose, onUpdateStatus, onVerify }) {
   const status = getStatus(light); const color = COLORS[status];
   const vCount = getVerifyCount(light);
   const lastReport = light.reports?.length ? light.reports[light.reports.length - 1] : null;
@@ -329,26 +329,45 @@ function LightDetailPanel({ light, onClose, onUpdateStatus, onDelete, onVerify }
       )}
 
       {(status === 'not_working' || status === 'reported' || status === 'pending_verify') && (
-        <button className="btn-secondary" onClick={onVerify}>✅ Verify Fixed ({vCount}/{VERIFY_NEEDED})</button>
+        <button className="btn-secondary" onClick={onVerify}>✅ Mark as Fixed</button>
       )}
 
-      <button className="btn-danger" onClick={onDelete}>Remove Streetlight</button>
 
-      {light.reports && light.reports.length > 0 && (<>
-        <div className="divider" /><div className="form-label">Report History ({light.reports.length})</div>
-        {[...light.reports].reverse().map(r => (
-          <div key={r.id} className="report-card">
-            <div className="report-card-header">
-              <span className="report-type">{r.fault_type}{r.is_rereport ? <span className="rereport-badge">Re-report</span> : ''}</span>
-              <span className="text-muted text-xs">{new Date(r.reported_at).toLocaleDateString()}</span>
-            </div>
-            {r.description && <div className="report-notes">{r.description}</div>}
-            {r.etshwane_ref && <div className="ref-number">Ref: {r.etshwane_ref}</div>}
-            <div className="text-muted text-xs" style={{marginTop:4}}>
-              {r.resolved ? 'Resolved ✓' : 'Open'}
-            </div>
-          </div>
-        ))}
+      {(light.reports?.length > 0 || light.verifications?.length > 0) && (<>
+        <div className="divider" /><div className="form-label">History</div>
+        {(() => {
+          const items = [];
+          (light.reports || []).forEach(r => items.push({ type:'report', date: new Date(r.reported_at), data: r }));
+          (light.verifications || []).forEach(v => items.push({ type:'fixed', date: new Date(v.verified_at), data: v }));
+          items.sort((a,b) => b.date - a.date);
+          return items.map((item, idx) => {
+            if (item.type === 'report') {
+              const r = item.data;
+              return (
+                <div key={'r'+r.id} className="report-card">
+                  <div className="report-card-header">
+                    <span className="report-type">{r.fault_type}{r.is_rereport ? <span className="rereport-badge">Re-report</span> : ''}</span>
+                    <span className="text-muted text-xs">{item.date.toLocaleDateString()}</span>
+                  </div>
+                  {r.description && <div className="report-notes">{r.description}</div>}
+                  {r.etshwane_ref && <div className="ref-number">Ref: {r.etshwane_ref}</div>}
+                  {!r.etshwane_ref && !r.resolved && <div className="text-muted text-xs" style={{marginTop:4,color:'#f97316'}}>⏳ Awaiting e-Tshwane submission...</div>}
+                </div>
+              );
+            } else {
+              const v = item.data;
+              return (
+                <div key={'v'+v.id} className="report-card" style={{borderColor:'#22c55e33'}}>
+                  <div className="report-card-header">
+                    <span style={{color:'#22c55e',fontWeight:600,fontSize:13}}>✅ Marked as Fixed</span>
+                    <span className="text-muted text-xs">{item.date.toLocaleDateString()}</span>
+                  </div>
+                  <div className="text-muted text-xs">By {v.verified_by_name}</div>
+                </div>
+              );
+            }
+          });
+        })()}
       </>)}
     </div>
   </>);
@@ -400,18 +419,13 @@ function RefEntryPanel({ report, onSave, onSkip }) {
 // ---- VerifyPanel ----
 function VerifyPanel({ light, onBack, onVerified, saving }) {
   const [name, setName] = useState('');
-  const [phone, setPhone] = useState('');
-  const ok = name.trim() && phone.trim();
+  const ok = name.trim();
   return (<>
-    <div className="panel-header"><div style={{display:'flex',alignItems:'center',gap:8}}><button className="btn-close" onClick={onBack}>←</button><span className="panel-title">Verify Fixed — Pole {light.pole_number}</span></div></div>
+    <div className="panel-header"><div style={{display:'flex',alignItems:'center',gap:8}}><button className="btn-close" onClick={onBack}>←</button><span className="panel-title">Mark Fixed — Pole {light.pole_number}</span></div></div>
     <div className="panel-body">
       <div className="banner banner-success">Confirm this streetlight is now working</div>
-      <div className="verify-progress" style={{justifyContent:'center',marginBottom:16}}>
-        {[0,1,2].map(i => <div key={i} className={'verify-dot' + (i < getVerifyCount(light) ? ' filled' : '')}>{i < getVerifyCount(light) ? '✓' : ''}</div>)}
-      </div>
       <div className="form-group"><label className="form-label">Your Name *</label><input className="form-input" value={name} onChange={e => setName(e.target.value)} /></div>
-      <div className="form-group"><label className="form-label">Your Phone *</label><input className="form-input" placeholder="Used to prevent duplicate votes" value={phone} onChange={e => setPhone(e.target.value)} /></div>
-      <button className="btn-primary" disabled={!ok||saving} onClick={() => onVerified(name, phone)}>{saving ? 'Verifying...' : '✅ Confirm Light is Working'}</button>
+      <button className="btn-primary" disabled={!ok||saving} onClick={() => onVerified(name, '-')}>{saving ? 'Saving...' : '✅ Mark as Fixed'}</button>
     </div>
   </>);
 }
@@ -603,7 +617,7 @@ export default function App() {
           </div>
           {panel && <aside className="panel">
             {panel.type==='add' && <AddLightPanel coords={panel.data} onSave={handleSaveLight} onCancel={()=>{setPanel(null);setSelectedId(null)}} saving={saving} />}
-            {panel.type==='detail' && <LightDetailPanel light={panel.data} onClose={()=>{setPanel(null);setSelectedId(null)}} onUpdateStatus={() => setPanel({type:'updatestatus',data:panel.data})} onDelete={()=>handleDelete(panel.data.id)} onVerify={()=>setPanel({type:'verify',data:panel.data})} />}
+            {panel.type==='detail' && <LightDetailPanel light={panel.data} onClose={()=>{setPanel(null);setSelectedId(null)}} onUpdateStatus={() => setPanel({type:'updatestatus',data:panel.data})} onVerify={()=>setPanel({type:'verify',data:panel.data})} />}
             {panel.type==='updatestatus' && <UpdateStatusPanel light={panel.data} reporter={reporter} onBack={()=>setPanel({type:'detail',data:panel.data})} onSubmit={handleReport} saving={saving} />}
             {panel.type==='verify' && <VerifyPanel light={panel.data} onBack={()=>setPanel({type:'detail',data:panel.data})} onVerified={handleVerify} saving={saving} />}
           </aside>}
