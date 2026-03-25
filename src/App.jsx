@@ -400,6 +400,7 @@ function UpdateStatusPanel({ light, reporter, onBack, onSubmit, saving }) {
         <div className="form-group"><label className="form-label">Email</label><input className="form-input" value={f.reporterEmail} onChange={e => setF({...f, reporterEmail: e.target.value})} /></div>
       </div>
       <div className="form-group"><label className="form-label">e-Tshwane Ref Number (optional - auto-filled)</label><input className="form-input" placeholder="Leave blank for auto-submission" value={f.etshwaneRef} onChange={e => setF({...f, etshwaneRef: e.target.value})} /></div>
+      <div className="text-muted text-xs" style={{textAlign:'center',margin:'12px 0 4px',lineHeight:1.4}}>By submitting, your name, phone and email will be shared with the City of Tshwane via e-Tshwane to process your fault report. Your details are stored securely and not shared with third parties.</div>
       <button className="btn-primary" disabled={!ok||saving} onClick={() => onSubmit({...f, isRereport})}>{saving ? 'Saving...' : '💾 Submit Report'}</button>
     </div>
   </>);
@@ -540,7 +541,7 @@ export default function App() {
     return () => supabase.removeChannel(ch);
   }, []);
 
-  const handleMapClick = useCallback(coords => { if(panel?.type==='report'||panel?.type==='verify') return; setPanel({type:'add',data:coords}); setSelectedId(null); }, [panel]);
+  const handleMapClick = useCallback(() => {}, []);
   const handleMarkerClick = useCallback(id => { const l=lights.find(x=>x.id===id); if(l){setPanel({type:'detail',data:l});setSelectedId(id);} }, [lights]);
   const goToLight = (id) => { const l=lights.find(x=>x.id===id); if(l){setFlyTo({lat:l.lat,lng:l.lng});setPanel({type:'detail',data:l});setSelectedId(id);} };
 
