@@ -236,7 +236,7 @@ function SearchBar({ onResult, onExisting, lights }) {
 
   return (
     <div className="search-bar"><div style={{position:'relative'}}>
-      <input placeholder="Search your address for service report, e.g 123 Watermeyer St..." value={q}
+      <input placeholder="Search the street where you want to report faulty lights..." value={q}
         onChange={e => handleChange(e.target.value)}
         onKeyDown={e => { if (e.key === 'Enter' && suggestions.length) handleSelect(suggestions[0]); }}
         onBlur={() => setTimeout(() => setSuggestions([]), 200)} />
@@ -264,14 +264,7 @@ function PhotoUpload({ label, value, onChange }) {
 
 // ---- AddLightPanel ----
 function AddLightPanel({ coords, onSave, onCancel, saving }) {
-  const [f, setF] = useState({ 
-    poleNumber:'', 
-    streetName: '', 
-    streetNumber:'', 
-    suburb:'', 
-    nearestIntersection:'', 
-    photo:null, 
-    isWorking:false });
+  const [f, setF] = useState({ poleNumber:'', streetName: coords.address || '', streetNumber:'', suburb:'Meyerspark', nearestIntersection:'', photo:null, isWorking:false });
   const ok = f.poleNumber.trim() && f.streetName.trim() && f.streetNumber.trim();
   return (<>
     <div className="panel-header"><span className="panel-title">Add Streetlight</span><button className="btn-close" onClick={onCancel}>✕</button></div>
