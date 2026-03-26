@@ -264,7 +264,7 @@ function PhotoUpload({ label, value, onChange }) {
 
 // ---- AddLightPanel ----
 function AddLightPanel({ coords, onSave, onCancel, saving }) {
-  const [f, setF] = useState({ poleNumber:'', streetName: coords.address || '', streetNumber:'', suburb:'Meyerspark', nearestIntersection:'', photo:null, isWorking:true });
+  const [f, setF] = useState({ poleNumber:'', streetName: coords.address || '', streetNumber:'', suburb:'Meyerspark', nearestIntersection:'', photo:null, isWorking:false });
   const ok = f.poleNumber.trim() && f.streetName.trim() && f.streetNumber.trim();
   return (<>
     <div className="panel-header"><span className="panel-title">Add Streetlight</span><button className="btn-close" onClick={onCancel}>✕</button></div>
