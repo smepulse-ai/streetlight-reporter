@@ -34,17 +34,18 @@ The developers are in no way financially responsible for any of the services you
 - VPS server hosted in South Africa — automated municipal fault submission (monthly server cost ~ R100 per month)
 
 **Need help setting this up for your ward?** Get in touch — we offer a done-for-you setup service.
+📧 [smepulseai@gmail.com](mailto:smepulseai@gmail.com)
 
 | Service | Cost |
 |---------|------|
-| Once-off ward setup | R2,500 no VAT charged |
-| Software support & updates | R350 no VAT charged |
+| Once-off ward setup | R2,500.00 no VAT |
+| Software support & updates | R350.00 no VAT |
 
 * Support covers the application software and updates only.
 * Bug Fixes will not be charged.
 * Third-party infrastructure (VPS, domain, Google Maps, Supabase, Cloudflare) is the responsibility of the ward and is not included. The developer will not get involved in, or support billing disputes.
 
-📧 [smepulseai@gmail.com](mailto:smepulseai@gmail.com)
+
 
 ---
 
