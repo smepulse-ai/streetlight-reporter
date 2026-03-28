@@ -2,14 +2,15 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 const GMAP_KEY = import.meta.env.VITE_GMAP_KEY;
 import { supabase } from './supabaseClient';
 import './App.css';
+import config from './ward.config.js';
 
-const CENTER = [-25.7461, 28.2881];
-const ZOOM = 15;
-const COOLDOWN = 7 * 24 * 60 * 60 * 1000;
-const FAULT_TYPES = ['Area Fault','Damaged Pole','High mast Light out (Apollo)','Lights Flickering','Lights on 24/7','Single Light Fault','Damaged high-mast pole'];
+const CENTER = [config.map.center.lat, config.map.center.lng];
+const ZOOM = config.map.zoom;
+const COOLDOWN = config.reporting.cooldownDays * 24 * 60 * 60 * 1000;
+const FAULT_TYPES = config.reporting.faultTypes;
 const COLORS = { working: '#22c55e', not_working: '#ef4444', reported: '#f97316', pending_verify: '#eab308' };
 const LABELS = { working: 'Working', not_working: 'Not Working', reported: 'Reported (<72h)', pending_verify: 'Pending Verification' };
-const VERIFY_NEEDED = 1;
+const VERIFY_NEEDED = config.reporting.verificationsNeeded;
 
 // ---- Helpers ----
 const canReport = (reports) => {
@@ -42,26 +43,26 @@ const getVerifyCount = (light) => {
 const wasEverResolved = (reports) => (reports || []).some(r => r.resolved);
 
 const genMailBody = (light, r) => {
-  return 'Dear City of Tshwane Streetlights Division,\n\nI wish to report a faulty streetlight:\n\nPole Number: ' + light.pole_number +
+  return 'Dear ' + config.municipality + ' Service Delivery Division,\n\nI wish to report a fault:\n\nPole Number: ' + light.pole_number +
     '\nStreet: ' + (light.street_number ? light.street_number + ' ' : '') + light.street_name +
-    '\nSuburb: ' + (light.suburb || 'Meyerspark') +
+    '\nSuburb: ' + (light.suburb || config.defaultSuburb) +
     '\nNearest Intersection: ' + (light.nearest_intersection || 'N/A') +
     '\nFault Type: ' + r.faultType +
     '\nDescription: ' + (r.description || 'N/A') +
     '\n\nReporter: ' + r.reporterName + ' ' + r.reporterSurname +
     '\nContact: ' + r.reporterPhone + (r.reporterEmail ? ' / ' + r.reporterEmail : '') +
     '\n\nGPS: ' + light.lat.toFixed(6) + ', ' + light.lng.toFixed(6) +
-    '\n\nReported via Tshwane Streetlight Reporter';
+    '\n\nReported via ' + config.appName;
 };
 
 const genMailto = (light, r) => {
-  const subj = encodeURIComponent('Faulty Streetlight — Pole ' + light.pole_number + ' — ' + light.street_name);
+  const subj = encodeURIComponent(config.wardName + ' Fault Report — Pole ' + light.pole_number + ' — ' + light.street_name);
   const body = encodeURIComponent(genMailBody(light, r));
-  return 'mailto:streetlights@tshwane.gov.za?subject=' + subj + '&body=' + body;
+  return 'mailto:' + config.reporting.email + '?subject=' + subj + '&body=' + body;
 };
 
 const genClipboardData = (light, r) => JSON.stringify({
-  task: 'Street Lights',
+  task: config.appName,
   service: r.faultType,
   name: r.reporterName,
   surname: r.reporterSurname,
@@ -69,10 +70,10 @@ const genClipboardData = (light, r) => JSON.stringify({
   email: r.reporterEmail || '',
   streetName: light.street_name,
   streetNumber: light.street_number || '',
-  suburb: light.suburb || 'Meyerspark',
+  suburb: light.suburb || config.defaultSuburb,
   intersection: light.nearest_intersection || '',
   poleId: light.pole_number,
-  description: r.description || 'Faulty streetlight - ' + r.faultType
+  description: r.description || r.faultType
 });
 
 // ---- Supabase ----
@@ -89,7 +90,7 @@ async function fetchLights() {
 async function insertLight(d) {
   const { data, error } = await supabase.from('streetlights').insert({
     pole_number: d.poleNumber, street_name: d.streetName, street_number: d.streetNumber || null,
-    suburb: d.suburb || 'Meyerspark', nearest_intersection: d.nearestIntersection || null,
+    suburb: d.suburb || config.defaultSuburb, nearest_intersection: d.nearestIntersection || null,
     lat: d.lat, lng: d.lng, photo_url: d.photo || null
   }).select().single();
   if (error) { console.error('Insert error:', error); return null; }
@@ -204,15 +205,15 @@ function SearchBar({ onResult, onExisting, lights }) {
     if (val.trim().length < 3) { setSuggestions(poleSugg); return; }
     if (window.google && window.google.maps) {
       const geocoder = new window.google.maps.Geocoder();
-      const fullQ = (val.toLowerCase().includes('pretoria') || val.toLowerCase().includes('meyerspark')) ? val : val + ', Meyerspark, Pretoria, South Africa';
+      const fullQ = (val.toLowerCase().includes(config.defaultCity.toLowerCase()) || val.toLowerCase().includes(config.defaultSuburb.toLowerCase())) ? val : val + ', ' + config.defaultSuburb + ', ' + config.defaultCity + ', ' + config.defaultCountry;
       try {
         const result = await new Promise((resolve, reject) => {
           geocoder.geocode({ address: fullQ, region: 'za' }, (results, status) => {
             if (status === 'OK' && results.length > 0) resolve(results); else reject(status);
           });
         });
-        const WARD41 = { north: -25.720, south: -25.760, east: 28.340, west: 28.290 };
-        const inBounds = (lat, lng) => lat >= WARD41.south && lat <= WARD41.north && lng >= WARD41.west && lng <= WARD41.east;
+        const { north, south, east, west } = config.boundary;
+        const inBounds = (lat, lng) => lat >= south && lat <= north && lng >= west && lng <= east;
         const addrSugg = result.filter(r => inBounds(r.geometry.location.lat(), r.geometry.location.lng())).slice(0,3).map(r => ({ type:'addr', lat: r.geometry.location.lat(), lng: r.geometry.location.lng(), label: r.formatted_address.split(',')[0], sub: r.formatted_address.split(',').slice(0,3).join(',') }));
         if (addrSugg.length === 0 && poleSugg.length === 0) { setSuggestions([{ type:'info', label:'Address not in Ward 41', sub:'Only Ward 41 addresses considered' }]); return; }
         setSuggestions([...poleSugg, ...addrSugg]);
@@ -561,7 +562,7 @@ export default function App() {
     if (window.google?.maps) {
       try {
         const geocoder = new window.google.maps.Geocoder();
-        const fullAddr = `${form.streetNumber} ${form.streetName}, ${form.suburb || 'Meyerspark'}, Pretoria, South Africa`;
+        const fullAddr = `${form.streetNumber} ${form.streetName}, ${form.suburb || config.defaultSuburb}, ${config.defaultCity}, ${config.defaultCountry}`;
         const results = await new Promise((resolve, reject) =>
           geocoder.geocode({ address: fullAddr, region: 'za' }, (res, status) =>
             status === 'OK' && res.length > 0 ? resolve(res) : reject(status)
@@ -631,7 +632,7 @@ export default function App() {
   return (
     <div className="app">
       <header className="header">
-        <div className="logo"><div className="logo-icon">💡</div><div><div className="logo-text">CoT - Ward 41 Service Delivery Tracker</div><div className="logo-sub">Meyerspark • City of Tshwane</div></div></div>
+        <div className="logo"><div className="logo-icon">💡</div><div><div className="logo-text">{config.wardName} — {config.appName}</div><div className="logo-sub">{config.defaultSuburb} • {config.municipality}</div></div></div>
         <nav className="nav-btns">
           <button className={'nav-btn'+(view==='map'?' active':'')} onClick={()=>setView('map')}>🗺 Map</button>
           <button className={'nav-btn'+(view==='dashboard'?' active':'')} onClick={()=>setView('dashboard')}>📊 Dashboard</button>
