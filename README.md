@@ -22,9 +22,8 @@ Built for **City of Tshwane Wards** and designed to be deployed for any municipa
 
 
 ## Setup
-**_We do not provide hosted services yet, for now you will be required to sign up and make direct payment to the individual providers._**
-
-**_The developers are in no way financially responsible for any of the services you use and the providers could at any time change their respective billing models._**
+**_ - We do not provide hosted services yet, for now you will be required to sign up and make direct payment to the individual providers._**
+**_ - The developers are in no way financially responsible for any of the services you use and the providers could at any time change their respective billing models._**
 
 This project requires the following:
 - Cloudflare — hosting (free tier at time of writing - https://www.cloudflare.com/plans/free/)
@@ -42,9 +41,8 @@ This project requires the following:
 | Once-off ward setup | R2,500.00 no VAT |
 | Software support & updates | R350.00 no VAT |
 
-* Support covers the application software and updates only.
-* Bug fixes will not be charged.
-* Third-party infrastructure (VPS, domain, Google Maps, Supabase, Cloudflare) is the responsibility of the ward and is not included. The developer will not get involved in, or support billing disputes.
+* Support covers the application software and updates only including bug fixes.
+**_ - Third-party infrastructure (VPS, domain, Google Maps, Supabase, Cloudflare) is the responsibility of the ward and is not included. The developer will not get involved in, or support billing disputes._**
 
 ---
 
