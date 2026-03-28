@@ -41,8 +41,7 @@ This project requires the following:
 | Once-off ward setup | R2,500.00 no VAT |
 | Software support & updates | R350.00 no VAT |
 
-* Support covers the application software and updates only including bug fixes.
-**_Third-party infrastructure (VPS, domain, Google Maps, Supabase, Cloudflare) is the responsibility of the ward and is not included. The developer will not get involved in, or support billing disputes._**
+**_ Support covers the application software and updates only including bug fixes. Third-party infrastructure (VPS, domain, Google Maps, Supabase, Cloudflare) is the responsibility of the ward and is not included. The developer will not get involved in, or support billing disputes._**
 
 ---
 
