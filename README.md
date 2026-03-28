@@ -20,15 +20,6 @@ Built for **City of Tshwane Ward 41** and designed to be deployed for any munici
 
 ---
 
-## Tech Stack
-
-- React + Vite
-- Supabase (database)
-- Google Maps (geocoding + display)
-- Cloudflare Workers (hosting)
-- GitHub Actions (CI/CD)
-
----
 
 ## Setup
 
