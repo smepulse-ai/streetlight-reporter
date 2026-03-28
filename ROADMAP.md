@@ -1,6 +1,6 @@
 # Product Roadmap
 
-This is a directional roadmap for the Community Service Delivery Tracker. There are no fixed timelines — this is a community-driven side project that evolves based on need and contribution.
+This is the development roadmap for the Community Service Delivery Tracker. Phases are delivered incrementally, with each building on the last.
 
 ---
 
@@ -19,7 +19,31 @@ Community reporting and tracking of streetlight faults.
 
 ---
 
-## Phase 2 — Energy & Electricity
+## Phase 2 — Admin Portal
+
+A secure administration interface for ward administrators to manage the tracker.
+
+- Authenticated admin login
+- Manage and edit streetlight records
+- View and export all reports and reference numbers
+- Override or correct report statuses
+- User activity overview
+
+---
+
+## Phase 3 — Councillor Dashboard
+
+A dedicated read-only dashboard for ward councillors and oversight structures.
+
+- High-level view of ward service delivery performance
+- Fault trends over time
+- Municipal response time tracking
+- Re-report rate and accountability metrics
+- Exportable reports for council meetings
+
+---
+
+## Phase 4 — Energy & Electricity
 
 Expand reporting to cover broader electricity infrastructure beyond streetlights.
 
@@ -30,7 +54,7 @@ Expand reporting to cover broader electricity infrastructure beyond streetlights
 
 ---
 
-## Phase 3 — Water & Sanitation
+## Phase 5 — Water & Sanitation
 
 Track water and sanitation faults in the ward.
 
@@ -41,7 +65,7 @@ Track water and sanitation faults in the ward.
 
 ---
 
-## Phase 4 — Roads & Transport
+## Phase 6 — Roads & Transport
 
 Report and track road infrastructure faults.
 
@@ -52,7 +76,7 @@ Report and track road infrastructure faults.
 
 ---
 
-## Phase 5 — Traffic Lights & Robots
+## Phase 7 — Traffic Lights & Robots
 
 Dedicated tracking for traffic signal faults.
 
@@ -62,7 +86,7 @@ Dedicated tracking for traffic signal faults.
 
 ---
 
-## Phase 6 — Environment & Parks
+## Phase 8 — Environment & Parks
 
 Community reporting for environmental and parks maintenance.
 
@@ -73,7 +97,7 @@ Community reporting for environmental and parks maintenance.
 
 ---
 
-## Phase 7 — Community Services
+## Phase 9 — Community Services
 
 Broader community service delivery tracking.
 
