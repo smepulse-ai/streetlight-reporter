@@ -4,7 +4,8 @@ A community-driven web app for reporting and tracking municipal service delivery
 
 Built for **City of Tshwane Ward 41** and designed to be deployed for any municipal ward.
 
-> **Note:** This template was developed against the **City of Tshwane e-Tshwane reporting portal**. Other municipalities may require customisation.
+> **Municipal Compatibility**
+> This template was developed and tested against the **City of Tshwane e-Tshwane reporting portal**. For other municipalities, customisation or additional development may be required at an additional fee. Your municipality must support electronic fault submissions for the automated reporting features to function.
 
 ---
 
