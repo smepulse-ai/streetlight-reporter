@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
-const GMAP_KEY = 'AIzaSyCx3bJdyxewE8bvlzSAnJlxxblySfqJZrY';
+const GMAP_KEY = import.meta.env.VITE_GMAP_KEY;
 import { supabase } from './supabaseClient';
 import './App.css';
 
@@ -263,20 +263,32 @@ function PhotoUpload({ label, value, onChange }) {
 }
 
 // ---- AddLightPanel ----
-function AddLightPanel({ coords, onSave, onCancel, saving }) {
-  const [f, setF] = useState({ 
-    poleNumber:'', 
-    streetName: '', 
-    streetNumber:'', 
-    suburb:'', 
-    nearestIntersection:'', 
-    photo:null, 
+function parseSearchedAddress(addr) {
+  if (!addr) return { streetNumber: '', streetName: '', suburb: '' };
+  const parts = addr.split(',').map(p => p.trim());
+  const streetPart = parts[0] || '';
+  const suburb = parts[1] || '';
+  const match = streetPart.match(/^(\d+[a-zA-Z]?)\s+(.+)$/);
+  if (match) return { streetNumber: match[1], streetName: match[2], suburb };
+  return { streetNumber: '', streetName: streetPart, suburb };
+}
+
+function AddLightPanel({ coords, onSave, onCancel, saving, error }) {
+  const parsed = parseSearchedAddress(coords.address);
+  const [f, setF] = useState({
+    poleNumber:'',
+    streetName: parsed.streetName,
+    streetNumber: parsed.streetNumber,
+    suburb: parsed.suburb,
+    nearestIntersection:'',
+    photo:null,
     isWorking:false });
   const ok = f.poleNumber.trim() && f.streetName.trim() && f.streetNumber.trim();
   return (<>
     <div className="panel-header"><span className="panel-title">Add Streetlight</span><button className="btn-close" onClick={onCancel}>✕</button></div>
     <div className="panel-body">
       <div className="banner banner-success">📍 {coords.lat.toFixed(5)}, {coords.lng.toFixed(5)}</div>
+      {error && <div className="banner banner-danger">{error}</div>}
       <div className="form-group"><label className="form-label">Pole Number *</label><input className="form-input" placeholder="e.g. 3" value={f.poleNumber} onChange={e => setF({...f, poleNumber: e.target.value})} /></div>
       <div className="form-row">
         <div className="form-group"><label className="form-label">Street Name *</label><input className="form-input" placeholder="e.g. Koordinaat St" value={f.streetName} onChange={e => setF({...f, streetName: e.target.value})} /></div>
@@ -389,7 +401,7 @@ function LightDetailPanel({ light, onClose, onUpdateStatus, onVerify }) {
 }
 
 // ---- UpdateStatusPanel ----
-function UpdateStatusPanel({ light, reporter, onBack, onSubmit, saving }) {
+function UpdateStatusPanel({ light, reporter, onBack, onSubmit, saving, error }) {
   const [f, setF] = useState({ faultType: FAULT_TYPES[5], etshwaneRef: '', description: '', reporterName: reporter.name||'', reporterSurname: reporter.surname||'', reporterPhone: reporter.phone||'', reporterEmail: reporter.email||'' });
   const isRereport = wasEverResolved(light.reports);
   const ok = f.reporterName.trim() && f.reporterSurname.trim() && f.reporterPhone.trim();
@@ -397,6 +409,7 @@ function UpdateStatusPanel({ light, reporter, onBack, onSubmit, saving }) {
     <div className="panel-header"><div style={{display:'flex',alignItems:'center',gap:8}}><button className="btn-close" onClick={onBack}>←</button><span className="panel-title">Report — Pole {light.pole_number}</span></div></div>
     <div className="panel-body">
       {isRereport && <div className="banner banner-rereport">⚠️ RE-REPORT: This light was previously marked as fixed</div>}
+      {error && <div className="banner banner-danger">{error}</div>}
       <div className="form-group"><label className="form-label">Fault Type *</label>
         <select className="form-select" value={f.faultType} onChange={e => setF({...f, faultType: e.target.value})}>{FAULT_TYPES.map(t => <option key={t} value={t}>{t}</option>)}</select>
       </div>
@@ -433,13 +446,14 @@ function RefEntryPanel({ report, onSave, onSkip }) {
 }
 
 // ---- VerifyPanel ----
-function VerifyPanel({ light, onBack, onVerified, saving }) {
+function VerifyPanel({ light, onBack, onVerified, saving, error }) {
   const [name, setName] = useState('');
   const ok = name.trim();
   return (<>
     <div className="panel-header"><div style={{display:'flex',alignItems:'center',gap:8}}><button className="btn-close" onClick={onBack}>←</button><span className="panel-title">Mark Fixed — Pole {light.pole_number}</span></div></div>
     <div className="panel-body">
       <div className="banner banner-success">Confirm this streetlight is now working</div>
+      {error && <div className="banner banner-danger">{error}</div>}
       <div className="form-group"><label className="form-label">Your Name *</label><input className="form-input" value={name} onChange={e => setName(e.target.value)} /></div>
       <button className="btn-primary" disabled={!ok||saving} onClick={() => onVerified(name, '-')}>{saving ? 'Saving...' : '✅ Mark as Fixed'}</button>
     </div>
@@ -509,22 +523,6 @@ function Dashboard({ lights }) {
   );
 }
 
-// ---- CSV Export ----
-function exportCSV(lights) {
-  const h = ['Pole','Street','Number','Suburb','Intersection','Lat','Lng','Status','Days Broken','Reports','Re-Reports','Ref Numbers'];
-  const rows = lights.map(l => {
-    const s = getStatus(l); const reps = l.reports||[];
-    const firstFault = reps.find(r => !r.resolved);
-    const days = firstFault ? daysSince(firstFault.reported_at) : 0;
-    const reReps = reps.filter(r => r.is_rereport).length;
-    const refs = reps.filter(r => r.etshwane_ref).map(r => r.etshwane_ref).join('; ');
-    return [l.pole_number,'"'+l.street_name+'"',l.street_number||'',l.suburb||'','"'+(l.nearest_intersection||'')+'"',l.lat.toFixed(6),l.lng.toFixed(6),s,days,reps.length,reReps,'"'+refs+'"'].join(',');
-  });
-  const blob = new Blob([[h.join(','),...rows].join('\n')], {type:'text/csv'});
-  const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
-  a.download = 'streetlights_accountability_'+new Date().toISOString().split('T')[0]+'.csv'; a.click();
-}
-
 // ---- Main App ----
 export default function App() {
   const [lights, setLights] = useState([]);
@@ -533,6 +531,7 @@ export default function App() {
   const [selectedId, setSelectedId] = useState(null);
   const [saving, setSaving] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [flyTo, setFlyTo] = useState(null);
   const [pendingReport, setPendingReport] = useState(null);
   const [reporter, setReporter] = useState(() => {
@@ -557,23 +556,40 @@ export default function App() {
   const goToLight = (id) => { const l=lights.find(x=>x.id===id); if(l){setFlyTo({lat:l.lat,lng:l.lng});setPanel({type:'detail',data:l});setSelectedId(id);} };
 
   const handleSaveLight = async (form) => {
-    setSaving(true);
-    const nl = await insertLight({...form, lat: panel.data.lat, lng: panel.data.lng});
-    if (nl && !form.isWorking) {
+    setSaving(true); setError(null);
+    let lat = panel.data.lat;
+    let lng = panel.data.lng;
+    if (window.google?.maps) {
+      try {
+        const geocoder = new window.google.maps.Geocoder();
+        const fullAddr = `${form.streetNumber} ${form.streetName}, ${form.suburb || 'Meyerspark'}, Pretoria, South Africa`;
+        const results = await new Promise((resolve, reject) =>
+          geocoder.geocode({ address: fullAddr, region: 'za' }, (res, status) =>
+            status === 'OK' && res.length > 0 ? resolve(res) : reject(status)
+          )
+        );
+        lat = results[0].geometry.location.lat();
+        lng = results[0].geometry.location.lng();
+      } catch { /* fall back to search coords */ }
+    }
+    const nl = await insertLight({...form, lat, lng});
+    if (!nl) { setSaving(false); setError('Failed to save streetlight — please try again.'); return; }
+    if (!form.isWorking) {
       const upd = await reload(); setSaving(false);
       const ul = upd.find(l => l.id === nl.id);
       if (ul) { setPanel({type:'updatestatus', data: ul}); setSelectedId(ul.id); }
       return;
     }
     const upd = await reload(); setSaving(false);
-    if (nl) { const ul=upd.find(l=>l.id===nl.id); if(ul){setPanel({type:'detail',data:ul});setSelectedId(ul.id);} }
+    const ul=upd.find(l=>l.id===nl.id); if(ul){setPanel({type:'detail',data:ul});setSelectedId(ul.id);}
   };
 
   const handleReport = async (form) => {
-    setSaving(true);
+    setSaving(true); setError(null);
     const isRR = form.isRereport || false;
     const r = await insertReport(selectedId, { faultType: form.faultType, description: form.description || null, reporterName: form.reporterName, reporterSurname: form.reporterSurname, reporterPhone: form.reporterPhone, reporterEmail: form.reporterEmail || '', emailSent: false }, isRR);
-    if (r && form.etshwaneRef) { await updateRef(r.id, form.etshwaneRef); }
+    if (!r) { setSaving(false); setError('Failed to submit report — please try again.'); return; }
+    if (form.etshwaneRef) { await updateRef(r.id, form.etshwaneRef); }
     const ur = {name:form.reporterName,surname:form.reporterSurname,phone:form.reporterPhone,email:form.reporterEmail||''};
     setReporter(ur); try{localStorage.setItem('reporter-v2',JSON.stringify(ur))}catch{}
     const upd = await reload(); setSaving(false);
@@ -598,14 +614,13 @@ export default function App() {
 
   const handleVerify = async (name, phone) => {
     const light = panel.data;
-    const lastReport = light.reports[light.reports.length - 1];
+    const lastReport = light.reports?.at(-1);
     if (!lastReport) return;
-    setSaving(true);
+    setSaving(true); setError(null);
     const v = await insertVerification(light.id, lastReport.id, name, phone);
-    if (v) {
-      const currentCount = (light.verifications||[]).filter(x=>x.report_id===lastReport.id).length + 1;
-      if (currentCount >= VERIFY_NEEDED) { await resolveReport(lastReport.id); }
-    }
+    if (!v) { setSaving(false); setError('Failed to save verification — please try again.'); return; }
+    const currentCount = (light.verifications||[]).filter(x=>x.report_id===lastReport.id).length + 1;
+    if (currentCount >= VERIFY_NEEDED) { await resolveReport(lastReport.id); }
     const upd = await reload(); setSaving(false);
     const ul = upd.find(l=>l.id===light.id);
     if(ul) { setPanel({type:'detail',data:ul}); }
@@ -632,10 +647,10 @@ export default function App() {
             <div className="legend">{Object.entries(COLORS).map(([k,c])=>(<div key={k} className="legend-item"><div className="legend-dot" style={{background:c}} />{LABELS[k]}</div>))}<div className="legend-item"><strong style={{color:'#1a1b23'}}>{lights.length}</strong> total</div></div>
           </div>
           {panel && <aside className="panel">
-            {panel.type==='add' && <AddLightPanel coords={panel.data} onSave={handleSaveLight} onCancel={()=>{setPanel(null);setSelectedId(null)}} saving={saving} />}
-            {panel.type==='detail' && <LightDetailPanel light={panel.data} onClose={()=>{setPanel(null);setSelectedId(null)}} onUpdateStatus={() => setPanel({type:'updatestatus',data:panel.data})} onVerify={()=>setPanel({type:'verify',data:panel.data})} />}
-            {panel.type==='updatestatus' && <UpdateStatusPanel light={panel.data} reporter={reporter} onBack={()=>setPanel({type:'detail',data:panel.data})} onSubmit={handleReport} saving={saving} />}
-            {panel.type==='verify' && <VerifyPanel light={panel.data} onBack={()=>setPanel({type:'detail',data:panel.data})} onVerified={handleVerify} saving={saving} />}
+            {panel.type==='add' && <AddLightPanel coords={panel.data} onSave={handleSaveLight} onCancel={()=>{setPanel(null);setSelectedId(null);setError(null)}} saving={saving} error={error} />}
+            {panel.type==='detail' && <LightDetailPanel light={panel.data} onClose={()=>{setPanel(null);setSelectedId(null);setError(null)}} onUpdateStatus={() => {setPanel({type:'updatestatus',data:panel.data});setError(null)}} onVerify={()=>{setPanel({type:'verify',data:panel.data});setError(null)}} />}
+            {panel.type==='updatestatus' && <UpdateStatusPanel light={panel.data} reporter={reporter} onBack={()=>{setPanel({type:'detail',data:panel.data});setError(null)}} onSubmit={handleReport} saving={saving} error={error} />}
+            {panel.type==='verify' && <VerifyPanel light={panel.data} onBack={()=>{setPanel({type:'detail',data:panel.data});setError(null)}} onVerified={handleVerify} saving={saving} error={error} />}
           </aside>}
         </>) : <Dashboard lights={lights} />}
       </main>
