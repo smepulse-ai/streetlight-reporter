@@ -129,7 +129,6 @@ async function resolveReport(reportId) {
   return !error;
 }
 
-async function deleteLight(id) { const { error } = await supabase.from('streetlights').delete().eq('id', id); return !error; }
 
 // ---- MapView (Google Maps) ----
 function MapView({ lights, onMapClick, onMarkerClick, selectedId, flyTo }) {
@@ -626,7 +625,6 @@ export default function App() {
     if(ul) { setPanel({type:'detail',data:ul}); }
   };
 
-  const handleDelete = async (id) => { if(!window.confirm('Remove this streetlight?')) return; if(await deleteLight(id)){await reload();setPanel(null);setSelectedId(null);} };
 
   if (loading) return <div className="loading-screen"><div className="logo-icon">💡</div><div className="text-muted">Loading...</div></div>;
 
