@@ -22,10 +22,10 @@ Built for **City of Tshwane Wards** and designed to be deployed for any municipa
 
 
 ## Setup
+* We do not provide hosted services yet, for now you will be required to sign up and make direct payment to the individual providers.
+* The developers are in no way financially responsible for any of the services you use and the providers could at any time change their respective billing models.
 
-This project requires the following — (We do not provide hosted services yet, for now you will be required to sign up and make direct payment to the individual providers) :
-The developers are in no way financially responsible for any of the services you use and the providers could at any time change their respective billing models.
-
+This project requires the following:
 - Cloudflare — hosting (free tier at time of writing - https://www.cloudflare.com/plans/free/)
 - Domain name — your ward's web address (annual domain renewal ~ R100 per year)
 - GitHub — CI/CD via GitHub Actions (free tier at time of writing - https://docs.github.com/get-started/learning-about-github/githubs-products)
