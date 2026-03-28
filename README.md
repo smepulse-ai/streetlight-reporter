@@ -22,8 +22,8 @@ Built for **City of Tshwane Wards** and designed to be deployed for any municipa
 
 
 ## Setup
-* We do not provide hosted services yet, for now you will be required to sign up and make direct payment to the individual providers.
-* The developers are in no way financially responsible for any of the services you use and the providers could at any time change their respective billing models.
+*_We do not provide hosted services yet, for now you will be required to sign up and make direct payment to the individual providers._*
+*_The developers are in no way financially responsible for any of the services you use and the providers could at any time change their respective billing models._*
 
 This project requires the following:
 - Cloudflare — hosting (free tier at time of writing - https://www.cloudflare.com/plans/free/)
