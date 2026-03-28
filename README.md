@@ -2,7 +2,7 @@
 
 A community-driven web app for reporting and tracking municipal service delivery faults. Residents can log faults on a map, track municipal reference numbers, and verify when issues are resolved.
 
-Built for **City of Tshwane Ward 41** and designed to be deployed for any municipal ward.
+Built for **City of Tshwane Wards** and designed to be deployed for any municipal ward in City of Tshwane.
 
 > **Municipal Compatibility**
 > This template was developed and tested against the **City of Tshwane e-Tshwane reporting portal**. For other municipalities, customisation or additional development may be required at an additional fee. Your municipality must support electronic fault submissions for the automated reporting features to function.
@@ -44,8 +44,6 @@ The developers are in no way financially responsible for any of the services you
 * Support covers the application software and updates only.
 * Bug Fixes will not be charged.
 * Third-party infrastructure (VPS, domain, Google Maps, Supabase, Cloudflare) is the responsibility of the ward and is not included. The developer will not get involved in, or support billing disputes.
-
-
 
 ---
 
