@@ -38,7 +38,9 @@ The developers are in no way financially responsible for any of the services you
 | Service | Cost |
 |---------|------|
 | Once-off ward setup | R2,500 |
-| Support (per hour) | R350 |
+| Software support & updates (per hour) | R350 |
+
+Support covers the application software only. Third-party infrastructure (VPS, domain, Google Maps, Supabase, Cloudflare) is the responsibility of the ward and is not included.
 
 📧 [smepulseai@gmail.com](mailto:smepulseai@gmail.com)
 
