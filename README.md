@@ -23,15 +23,15 @@ Built for **City of Tshwane Ward 41** and designed to be deployed for any munici
 
 ## Setup
 
-This project requires the following — all under your own accounts and billing:
+This project requires the following — (We do not provide hosted services yet, for now you will be required to sign up and make direct payment to the individual providers) :
+The developers are in no way financially responsible for any of the services you use and the providers could at any time change their respective billing models.
 
-- Cloudflare — hosting (free tier at time of writing)
-- Domain name — your ward's web address (annual renewal)
-- GitHub — CI/CD via GitHub Actions (free tier at time of writing)
-- Google Maps API — geocoding + map display (free tier at time of writing)
-- Supabase — database (free tier at time of writing)
-- VPS server — automated municipal fault submission (monthly cost)
-
+- Cloudflare — hosting (free tier at time of writing - https://www.cloudflare.com/plans/free/)
+- Domain name — your ward's web address (annual domain renewal ~ R100 per year)
+- GitHub — CI/CD via GitHub Actions (free tier at time of writing - https://docs.github.com/get-started/learning-about-github/githubs-products)
+- Google Maps API — geocoding + map display (Essentials: Up to 10,000 free calls per SKU per month - https://mapsplatform.google.com/)
+- Supabase — database (free tier at time of writing. Limits apply - https://supabase.com/pricing)
+- VPS server hosted in South Africa — automated municipal fault submission (monthly server cost ~ R100 per month)
 
 **Need help setting this up for your ward?** Get in touch — we offer a done-for-you setup service.
 
