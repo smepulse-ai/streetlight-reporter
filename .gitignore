@@ -3,3 +3,9 @@ dist
 .env
 .env.local
 *.cjs
+
+# wrangler files
+.wrangler
+.dev.vars*
+!.dev.vars.example
+!.env.example
