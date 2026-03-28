@@ -37,10 +37,12 @@ The developers are in no way financially responsible for any of the services you
 
 | Service | Cost |
 |---------|------|
-| Once-off ward setup | R2,500 |
-| Software support & updates | R350 |
+| Once-off ward setup | R2,500 no VAT charged |
+| Software support & updates | R350 no VAT charged |
 
-Support covers the application software only. Third-party infrastructure (VPS, domain, Google Maps, Supabase, Cloudflare) is the responsibility of the ward and is not included.
+* Support covers the application software and updates only.
+* Bug Fixes will not be charged.
+* Third-party infrastructure (VPS, domain, Google Maps, Supabase, Cloudflare) is the responsibility of the ward and is not included. The developer will not get involved in, or support billing disputes.
 
 📧 [smepulseai@gmail.com](mailto:smepulseai@gmail.com)
 
