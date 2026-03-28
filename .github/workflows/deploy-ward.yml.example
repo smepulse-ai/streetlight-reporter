@@ -1,0 +1,44 @@
+# This is the deploy workflow for a ward installation.
+# Copy this to .github/workflows/deploy.yml in the ward's own repo.
+# To upgrade to a new version, change the VERSION value below.
+
+name: Deploy Ward to Cloudflare Workers
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:  # allows manual trigger from GitHub UI
+
+env:
+  VERSION: v1.0.0  # ← change this to upgrade to a new release
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout smepulse-ai release
+        uses: actions/checkout@v4
+        with:
+          repository: smepulse-ai/streetlight-reporter
+          ref: ${{ env.VERSION }}
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build
+        env:
+          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
+          VITE_GMAP_KEY: ${{ secrets.VITE_GMAP_KEY }}
+        run: npm run build
+
+      - name: Deploy
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
