@@ -4,6 +4,8 @@ A community-driven web app for reporting and tracking service delivery faults (e
 
 Built with React + Vite, Supabase (database), and Google Maps.
 
+> **Important:** This template was developed for and tested against the **City of Tshwane's e-Tshwane reporting portal**. The fault reporting flow, reference number format, and bookmarklet auto-fill are designed around Tshwane's specific system. Other municipalities may use different reporting portals, reference formats, or submission processes. This template may require customisation before it works correctly in other municipal contexts. It is provided as-is with no guarantee of compatibility outside the City of Tshwane.
+
 ---
 
 ## Features
