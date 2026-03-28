@@ -32,7 +32,6 @@ This project requires the following — all under your own accounts and billing:
 - Supabase — database (free tier at time of writing)
 - VPS server — automated municipal fault submission (monthly cost)
 
-A `ward.config.js` file controls all ward-specific settings.
 
 **Need help setting this up for your ward?** Get in touch — we offer a done-for-you setup service.
 
