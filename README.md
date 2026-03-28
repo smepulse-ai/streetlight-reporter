@@ -31,7 +31,15 @@ Built for **City of Tshwane Ward 41** and designed to be deployed for any munici
 
 ## Setup
 
-This project requires configuration of Supabase, Google Maps, Cloudflare and GitHub Actions. A `ward.config.js` file controls all ward-specific settings.
+This project requires the following — all under your own accounts and billing:
+
+- Supabase (database)
+- Google Maps API (geocoding + map display)
+- Cloudflare (hosting)
+- GitHub Actions (CI/CD)
+- A VPS server (for automated municipal fault submission)
+
+A `ward.config.js` file controls all ward-specific settings.
 
 **Need help setting this up for your ward?** Get in touch — we offer a done-for-you setup service.
 
