@@ -35,6 +35,13 @@ The developers are in no way financially responsible for any of the services you
 
 **Need help setting this up for your ward?** Get in touch — we offer a done-for-you setup service.
 
+| Service | Cost |
+|---------|------|
+| Once-off ward setup | R2,500 |
+| Support (per hour) | R350 |
+
+📧 [smepulseai@gmail.com](mailto:smepulseai@gmail.com)
+
 ---
 
 ## Roadmap
